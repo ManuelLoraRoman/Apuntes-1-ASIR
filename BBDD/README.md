@@ -8,7 +8,7 @@
 
 [3. Ejercicios de prueba](./Ejercicios)
 
-[4. Proyecto Hotel Rural](./Proyecto)
+[4. Proyecto Hotel Rural](./PROYECTO)
 
 [5. Ejercicio del 13 de Noviembre](./Ej_13Nov)
 
