@@ -1,0 +1,76 @@
+
+create table equipos
+(
+  Codigo VARCHAR(20),
+  Nombre VARCHAR(20),
+  Añodefundacion DATE,
+  Ciudad VARCHAR(20),
+  constraint PK_Codigo PRIMARY KEY(Codigo)
+);
+
+create table estadios
+(
+  Codigo VARCHAR(10),
+  Nombre VARCHAR(20),
+  Aforo int8 default 0,
+  FechaConstruccion DATE,
+  CodigoEquipo VARCHAR(20),
+  constraint PK_CodigoEstadio PRIMARY KEY(Codigo),
+  constraint FK_Codigo FOREIGN KEY (CodigoEquipo) REFERENCES equipos(Codigo)
+);
+
+create table presidentes
+(
+  DNI VARCHAR(10),
+  Nombre VARCHAR(20),
+  Apellidos VARCHAR(20),
+  FechaEleccion DATE,
+  FechaNacimiento DATE,
+  CodigoEquipo VARCHAR(20),
+  constraint PK_DNI PRIMARY KEY(DNI),
+  constraint FK_CodigoEquipo FOREIGN KEY (CodigoEquipo) REFERENCES equipos(Codigo)
+);
+
+create table jugadores
+(
+  Codigo VARCHAR(20),
+  Nombre VARCHAR(20),
+  FechaNacimiento DATE,
+  Posicion VARCHAR(15),
+  CodigoEquipo VARCHAR(20),
+  constraint PK_CodigoJugadores PRIMARY KEY(Codigo),
+  constraint FK_CodigoEquipo FOREIGN KEY (CodigoEquipo) REFERENCES equipos(Codigo),
+  constraint PosicionValida CHECK(Posicion IN ('Portero','Defensa','Centrocampista','Delantero')),
+  constraint FechaNacimientoValida CHECK(FechaNacimiento between TO_DATE('1/1/1901','DD/MM/YYYY') AND TO_DATE('31/12/2100','DD/MM/YYYY'))
+);
+
+create table partidos
+(
+  Codigo VARCHAR(20),
+  FechaInicio TIMESTAMP NOT NULL,
+  Duracion int4 default 100,
+  CodigoEquipoVisitante VARCHAR(20),
+  CodigoEquipoLocal VARCHAR(20),
+  constraint PK_CodigoPartidos PRIMARY KEY(Codigo),
+  constraint FK_CodigoVisitante FOREIGN KEY (CodigoEquipoVisitante) REFERENCES equipos(Codigo),
+  constraint FK_CodigoLocal FOREIGN KEY (CodigoEquipoLocal) REFERENCES equipos(Codigo),
+  constraint FechaValida CHECK(FechaInicio NOT between TO_TIMESTAMP('21/06','DD/MM') AND TO_TIMESTAMP('21/09','DD/MM') OR FechaInicio != TO_TIMESTAMP('25/12','DD/MM') OR FechaInicio != TO_TIMESTAMP('31/12','DD/MM'))
+);
+
+create table goles
+(
+  CodigoPartido VARCHAR(20),
+  CodigoJugador VARCHAR(20),
+  Minuto DATE,
+  Descripcion VARCHAR(20),
+  constraint FK_CodigoPartido FOREIGN KEY (CodigoPartido) REFERENCES partidos(Codigo),
+  constraint FK_CodigoJugador FOREIGN KEY (CodigoJugador) REFERENCES jugadores(Codigo)
+);
+
+alter table equipos ADD COLUMN NumTitulos BOOLEAN DEFAULT true;
+
+alter table estadios DROP COLUMN Aforo;
+
+alter table equipos ADD CONSTRAINT AñoValido CHECK(Añodefundacion > TO_DATE('1888','YYYY'));
+
+alter table partidos ADD CONSTRAINT HoraComienzo CHECK(FechaInicio between TO_TIMESTAMP('10:00:00','HH24:MI:SS') AND TO_TIMESTAMP('22:00:00','HH24:MI:SS'));

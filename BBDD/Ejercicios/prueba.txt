@@ -1,0 +1,19 @@
+A nivel de columna:
+
+create table matriculas
+(
+	dni_alumno	VARCHAR2(9)	CONSTRAINT PK_MATR PRIMARY KEY,
+	cod_asignatura	VARCHAR2(4)	CONSTRAINT FK_ASIG REFERENCES asignaturas(codigo),
+	fecha		DATE,
+);
+
+A nivel de tabla:
+
+create table matriculas
+(
+	dni_alumno	VARCHAR2(9),
+	cod_asignatura	VARCHAR2(4),
+	fecha		DATE,
+	constraint pk_matr PRIMARY KEY(dni_alumno, cod_asignatura),
+	constraint fk_asig FOREIGN KEY(cod_asignatura) REFERENCES (codigo),
+);

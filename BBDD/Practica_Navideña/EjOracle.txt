@@ -1,0 +1,99 @@
+
+create table clientes
+(
+  Codigo VARCHAR2(9),
+  Direccion VARCHAR2(20),
+  Telefono VARCHAR2(9),
+  constraint PK_Codigo PRIMARY KEY(Codigo)
+);
+
+create table proyectos
+(
+  Codigo VARCHAR2(20),
+  Descripcion VARCHAR2(20),
+  Cuantia NUMBER(10),
+  FechaInicio DATE,
+  FechaFin DATE,
+  CodigoCliente VARCHAR2(20),
+  constraint PK_CodigoProyecto PRIMARY KEY(Codigo),
+  constraint FK_CodigoCliente FOREIGN KEY (CodigoCliente) REFERENCES clientes(Codigo),
+  constraint CodigoValido CHECK(REGEXP_LIKE(Codigo,'^[S,T]*') OR REGEXP_LIKE(Codigo,'^.[S,T]*') OR REGEXP_LIKE(Codigo,'^..[S,T]*') OR REGEXP_LIKE(Codigo,'^...[S,T]*$'))
+);
+
+create table cuentas
+(
+  CodigoBanco VARCHAR2(4),
+  CodigoSucursal VARCHAR2(4),
+  NumeroCuenta VARCHAR2(9),
+  Banco VARCHAR2(20),
+  constraint PK_CodigoBancoSucursalCuenta PRIMARY KEY(CodigoBanco,CodigoSucursal,NumeroCuenta),
+  constraint BancoValido CHECK(Banco = INITCAP(Banco))
+);
+
+create table colaboradores
+(
+  NIF VARCHAR2(10),
+  Nombre VARCHAR2(20),
+  Apellidos VARCHAR2(20),
+  Domicilio VARCHAR2(20),
+  Telefono VARCHAR2(9),
+  CodigoBancoC VARCHAR2(4),
+  CodigoSucursalC VARCHAR2(4),
+  NumeroCuentaC VARCHAR2(9),
+  constraint PK_NIF PRIMARY KEY(NIF),
+  constraint FK_Codigos FOREIGN KEY (CodigoBancoC,CodigoSucursalC,NumeroCuentaC) REFERENCES cuentas(CodigoBanco,CodigoSucursal,NumeroCuenta),
+  constraint NombreValido CHECK(Nombre = INITCAP(Nombre))
+);
+
+create table colaboraciones
+(
+  CodigoProyecto VARCHAR2(20),
+  NIFColaborador VARCHAR2(10),
+  constraint FK_Codigo FOREIGN KEY (CodigoProyecto) REFERENCES proyectos(Codigo),
+  constraint FK_NIF FOREIGN KEY (NIFColaborador) REFERENCES colaboradores(NIF)
+);
+
+create table tiposdepago
+(
+  Codigo VARCHAR2(13),
+  Descripcion VARCHAR2(20),
+  constraint PK_CodigoPago PRIMARY KEY(Codigo),
+  constraint CodigoValidoPago CHECK(Codigo IN ('Efectivo','Transferencia','Plazos'))
+);
+
+create table pagos
+(
+  Numero VARCHAR2(10),
+  Concepto VARCHAR2(15),
+  Importe NUMBER(8,2),
+  Fecha DATE,
+  CodigoTipodePago VARCHAR2(13),
+  CodigoProyecto VARCHAR2(20),
+  NIFColaborador VARCHAR2(10),
+  constraint PK_Numero PRIMARY KEY(Numero),
+  constraint FK_Tipo FOREIGN KEY (CodigoTipodePago) REFERENCES tiposdepago(Codigo),
+  constraint FK_Proyecto FOREIGN KEY (CodigoProyecto) REFERENCES proyectos(Codigo),
+  constraint FK_NIFPago FOREIGN KEY (NIFColaborador) REFERENCES colaboradores(NIF),
+  constraint ImporteValido CHECK(Importe < 35000 AND MOD(Importe,10) = 0)
+);
+
+insert into proyectos (Codigo,FechaInicio)
+values ('23SA120YT9',TO_DATE('9/2009','MM/YYYY'));
+
+alter table colaboradores ADD CONSTRAINT TelefonoValido
+CHECK(REGEXP_LIKE(Telefono,'^[67]*'));
+
+alter table clientes ADD CONSTRAINT CodigoClienteValido
+CHECK(REGEXP_LIKE(Codigo,'^C-*[AEIOUaeiou]$'));
+
+alter table pagos ADD CONSTRAINT ImporteObligatorio
+CHECK(Importe IS NOT NULL);
+
+alter table proyectos ADD Nombre VARCHAR2(20);
+
+alter table pagos DISABLE CONSTRAINT ImporteObligatorio;
+alter table pagos DISABLE CONSTRAINT ImporteValido;
+
+drop table colaboraciones CASCADE CONSTRAINT;
+
+alter table pagos DROP COLUMN Concepto;

@@ -1,0 +1,63 @@
+create table clientes
+(
+  Codigo VARCHAR(10),
+  NIF VARCHAR(10),
+  Nombre VARCHAR(20),
+  Direccion VARCHAR(20),
+  Ciudad VARCHAR(20),
+  Telefono VARCHAR(10),
+  constraint PK_Codigo PRIMARY KEY(Codigo),
+  constraint NIFValido CHECK(NIF REGEXP '^[0-9]{8}-[A-Z]'),
+  constraint TelefonoValido CHECK(Telefono REGEXP '^[679].*')
+);
+
+create table coches
+(
+  Matricula VARCHAR(10),
+  Marca VARCHAR(20) NOT NULL,
+  Modelo VARCHAR(20) NOT NULL,
+  Color VARCHAR(8),
+  PVP INTEGER(5),
+  CodigoCliente VARCHAR(10),
+  constraint PK_Matricula PRIMARY KEY(Matricula),
+  constraint FK_CodigoCliente FOREIGN KEY (CodigoCliente) REFERENCES clientes(Codigo),
+  constraint MatriculaValida CHECK((Matricula REGEXP '^[0-9]{4}[A-Z]{3}') OR (Matricula REGEXP '^[A-Z]{2}-[0-9]{4}-[A-Z]{2}') OR (Matricula REGEXP '^[A-Z]{1}-[0-9]{4}-[A-Z]{1}') OR (Matricula REGEXP '^[A-Z]{1}-[0-9]{4}-[A-Z]{2}') OR (Matricula REGEXP '^[A-Z]{2}-[0-9]{4}-[A-Z]{1}')),
+  constraint ColorValido CHECK(Color IN ('verde','rojo','amarillo','negro')),
+  constraint LongPVP CHECK(PVP between 10000 AND 90000)
+);
+
+create table revisiones
+(
+  Codigo VARCHAR(10),
+  FechaRevision DATETIME,
+  MatriculaCoche VARCHAR(10),
+  constraint PK_Codigo PRIMARY KEY(Codigo),
+  constraint FK_MatriculaCoche FOREIGN KEY (MatriculaCoche) REFERENCES coches(Matricula),
+  constraint RevisionValida CHECK(FechaRevision between STR_TO_DATE('08:00:00','%H:%i:%s') AND STR_TO_DATE('20:00:00','%H:%i:%s'))
+);
+
+create table operaciones
+(
+  Codigo VARCHAR(10),
+  Descripcion VARCHAR(20),
+  HorasMO INTEGER(4),
+  constraint PK_Codigo PRIMARY KEY(Codigo),
+  constraint HorasMOValido CHECK(HorasMO <= 6)
+);
+
+create table materiales
+(
+  Codigo VARCHAR(10),
+  Nombre VARCHAR(20),
+  Precio INTEGER(10),
+  constraint PK_Codigo PRIMARY KEY(Codigo)
+);
+
+create table piezasporoperacion
+(
+  CodigoMaterial VARCHAR(10),
+  CodigoOperacion VARCHAR(10),
+  Cantidad INTEGER(10) default 1,
+  constraint FK_CodigoMaterial FOREIGN KEY (CodigoMaterial) REFERENCES materiales(Codigo),
+  constraint FK_CodigoOperacion FOREIGN KEY (CodigoOperacion) REFERENCES operaciones(Codigo)
+);

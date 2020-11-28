@@ -1,0 +1,42 @@
+create table alumnos
+(
+  DNI_Alumno VARCHAR2(10),
+  Nombre VARCHAR2(20),
+  Direccion VARCHAR2(20),
+  Telefono VARCHAR2(10),
+  constraint PK_DNI PRIMARY KEY(DNI_Alumno),
+  constraint DNI_AlumnoOK CHECK(REGEXP_LIKE(DNI_Alumno,'^[0-9]{3}-[A-Z]$')),
+  constraint LongDNI CHECK(LENGTH(DNI_Alumno) between 1 AND 10),
+  constraint NombreOK CHECK(Nombre is NOT NULL),
+  constraint LongNombre CHECK(LENGTH(Nombre) between 1 AND 20),
+  constraint LongDireccion CHECK(LENGTH(Direccion) between 1 AND 20),
+  constraint TelefonoOK CHECK(Telefono LIKE '^95%'),
+  constraint LongTelefono CHECK(LENGTH(Telefono) between 1 AND 10)
+);
+
+create table empresas
+(
+  CIF_Empresa VARCHAR2(10),
+  Nombre VARCHAR2(20),
+  Direccion VARCHAR2(20),
+  Responsable_Legal VARCHAR2(10),
+  Sector VARCHAR2(15),
+  constraint PK_EMPRESA PRIMARY KEY(CIF_Empresa),
+  constraint CIFOK CHECK(LENGTH(CIF_Empresa) between 1 AND 10),
+  constraint NombreOK UNIQUE(Nombre),
+  constraint LongNombre CHECK(LENGTH(Nombre) between 1 AND 20),
+  constraint DireccionOK CHECK(Direccion is NOT NULL),
+  constraint LongDireccion CHECK(LENGTH(Direccion) between 1 AND 20),
+  constraint LongResponsable CHECK(LENGTH(Responsable_Legal) between 1 AND 10),
+  constraint LongSector CHECK(LENGTH(Sector) between 1 AND 15)
+);
+
+create table practicas
+(
+  DNI_Alumno VARCHAR2(10),
+  CIF_Empresa VARCHAR2(10),
+  Fecha_Inicio DATE,
+  NumHoras NUMBER(4),
+  constraint FK_dni FOREIGN KEY (DNI_Alumno) REFERENCES (alumnos),
+  constraint FK_empresa FOREIGN KEY (CIF_Empresa) REFERENCES (empresas),
+)
